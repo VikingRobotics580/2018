@@ -1,21 +1,28 @@
 #include <IterativeRobot.h>
 #include <Joystick.h>
+#include <Buttons/JoystickButton.h>
 #include <LiveWindow/LiveWindow.h>
 #include <RobotDrive.h>
 #include <Timer.h>
 
 class Robot: public frc::IterativeRobot {
 public:
-	Robot() {
+	Robot(): myRobot(0, 1),
+             stick(0),
+			 lw(frc::LiveWindow::GetInstance()),
+			 timer(),
+			 button1(&stick, 0)
+	{
 		myRobot.SetExpiration(0.1);
 		timer.Start();
 	}
 
 private:
-	frc::RobotDrive myRobot { 0, 1 };  // Robot drive system
-	frc::Joystick stick { 0 };         // Only joystick
-	frc::LiveWindow* lw = frc::LiveWindow::GetInstance();
+	frc::RobotDrive myRobot;  // Robot drive system
+	frc::Joystick stick;         // Only joystick
+	frc::LiveWindow* lw;
 	frc::Timer timer;
+	frc::JoystickButton button1;
 
 	void AutonomousInit() override {
 		timer.Reset();
