@@ -13,7 +13,7 @@ public:
 			 lw(frc::LiveWindow::GetInstance()),
 			 timer()
 	{
-		myRobot.SetExpiration(0.1);
+		myRobot.SetExpiration(0.2); //change back to 0.1
 		timer.Start();
 	}
 
