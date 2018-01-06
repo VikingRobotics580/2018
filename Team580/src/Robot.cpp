@@ -4,14 +4,14 @@
 #include <LiveWindow/LiveWindow.h>
 #include <RobotDrive.h>
 #include <Timer.h> // System directory
-#include "buttons.h" // Current directory (manually created files)
 
 class Robot: public frc::IterativeRobot {
 public:
 	Robot(): myRobot(0, 1),
              stick(0),
 			 lw(frc::LiveWindow::GetInstance()),
-			 timer()
+			 timer(),
+			 button1(&stick, 0) //address to stick, id: 0
 	{
 		myRobot.SetExpiration(0.1);
 		timer.Start();
@@ -22,6 +22,7 @@ private:
 	frc::Joystick stick;         // Only joystick
 	frc::LiveWindow* lw;
 	frc::Timer timer;
+	frc::JoystickButton button1;
 
 
 	void AutonomousInit() override {
