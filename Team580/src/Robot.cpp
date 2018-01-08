@@ -7,7 +7,7 @@
 
 class Robot: public frc::IterativeRobot {
 public:
-	Robot(): myRobot(0, 1),
+	Robot(): myRobot(kFrontLeftChannel, kRearLeftChannel, kFrontRightChannel, kRearRightChannel),
              stick(0),
 			 lw(frc::LiveWindow::GetInstance()),
 			 timer(),
@@ -24,6 +24,11 @@ private:
 	frc::Timer timer;
 	frc::JoystickButton button1;
 
+	static constexpr int kFrontLeftChannel = 2;
+	static constexpr int kRearLeftChannel = 3;
+	static constexpr int kFrontRightChannel = 1;
+	static constexpr int kRearRightChannel = 0;
+
 
 	void AutonomousInit() override {
 		timer.Reset();
@@ -33,9 +38,11 @@ private:
 	void AutonomousPeriodic() override {
 		// Drive for 2 seconds
 		if (timer.Get() < 2.0) {
-			myRobot.Drive(-0.5, 0.0);  // Drive forwards half speed
+			myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
+			//Percentage of Power along a specific Axis
+			//X - Left & Right, Y - Forward & Back, Twist - Rotate
 		} else {
-			myRobot.Drive(0.0, 0.0);  // Stop robot
+			myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.5));
 		}
 	}
 
@@ -45,7 +52,8 @@ private:
 
 	void TeleopPeriodic() override {
 		// Drive with arcade style (use right stick)
-		myRobot.ArcadeDrive(stick);
+		//myRobot.ArcadeDrive(stick);
+		myRobot.MecanumDrive_Cartesian(stick.GetX(), stick.GetY(), stick.GetTwist());
 	}
 
 	void TestPeriodic() override {
