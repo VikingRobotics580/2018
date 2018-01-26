@@ -6,7 +6,7 @@ public:
 		timer(),
 		frontLeft(0),
 		backLeft(1),
-		frontLeft(2),
+		frontRight(2),
 		backRight(3),
 		driveStation(DriverStation::GetInstance())
 {
@@ -81,6 +81,8 @@ private:
 	Talon backLeft; // back left wheel
 	Talon frontRight; // front right wheel
 	Talon backRight; // back right wheel
+	Talon cube; // Motor for cube retrival mechanism
+	Servo verticalControl; // Controls cube mechanism that it is situated on
 	Joystick* stick;
 	std::string gameData; // FMS data
 	DriverStation& driveStation;
