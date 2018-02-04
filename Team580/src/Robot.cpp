@@ -5,7 +5,6 @@
 #include <LiveWindow/LiveWindow.h>
 #include <RobotDrive.h>
 #include <Timer.h>
-//Test Change
 
 class Robot: public frc::IterativeRobot {
 public:
@@ -13,27 +12,25 @@ public:
 	stick(0),
 	lw(frc::LiveWindow::GetInstance()),
 	timer(),
-	button1(&stick, 0), //address to stick, id: 0
-	leftGrabber(4),
-	rightGrabber(5)
+	leftGrabber(4), // port 4
+	rightGrabber(5) // port 5
 {
 		myRobot.SetExpiration(0.1);
 		timer.Start();
 }
 
 private:
-	frc::RobotDrive myRobot;  // Robot drive system
-	frc::Joystick stick;         // Only joystick
+	frc::RobotDrive myRobot;
+	frc::Joystick stick;
 	frc::LiveWindow* lw;
 	frc::Timer timer;
-	frc::JoystickButton button1;
-
-	frc::Talon leftGrabber;
-	frc::Talon rightGrabber;
+	frc::Talon leftGrabber; // cube intake left motor
+	frc::Talon rightGrabber; // cube intake right motor
 	static constexpr int kFrontLeftChannel = 2;
 	static constexpr int kRearLeftChannel = 3;
 	static constexpr int kFrontRightChannel = 1;
 	static constexpr int kRearRightChannel = 0;
+	bool buttonEnabled = false; // checks if the cube intake motors are on
 
 	void AutonomousInit() override {
 		timer.Reset();
@@ -56,15 +53,19 @@ private:
 	}
 
 	void TeleopPeriodic() override {
-		// Drive with arcade style (use right stick)
 		//myRobot.ArcadeDrive(stick);
 		myRobot.MecanumDrive_Cartesian(stick.GetX(), stick.GetY(), stick.GetTwist());
 
-		if(stick.GetRawButton(7)) {
-			leftGrabber.Set(1);
-			rightGrabber.Set(-1);
+		// cube intake motor's "on" button
+		if(stick.GetRawButton(7)) buttonEnabled = true;
+		// "off" button
+		else if(stick.GetRawButton(9)) buttonEnabled = false;
 
-		} else if(stick.GetRawButton(9)) {
+		// joystick button 7 is pressed, set to joystick slider's manual control (-1.0 – +1.0)
+		if(buttonEnabled) {
+			leftGrabber.Set(stick.GetThrottle());
+			rightGrabber.Set(stick.GetThrottle());
+		} else { // otherwise, set the speed to 0 (turn off the motors)
 			leftGrabber.Set(0);
 			rightGrabber.Set(0);
 		}
@@ -74,5 +75,4 @@ private:
 		lw->Run();
 	}
 };
-
 START_ROBOT_CLASS(Robot)
