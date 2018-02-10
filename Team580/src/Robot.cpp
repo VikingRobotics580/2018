@@ -35,14 +35,16 @@ private:
 	void AutonomousInit() override {
 		timer.Reset();
 		timer.Start();
+		//FMS data
+		std::string gameData;
+		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage();
 	}
 
 	void AutonomousPeriodic() override {
-		// Drive for 2 seconds
 		if (timer.Get() < 2.0) {
 			myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
 			//Percentage of Power along a specific Axis
-			//X = Left & Right, Y = Forward & Back, Twist = Rotate
+			//X = left & right, Y = forward & backward, Twist = rotate
 		} else {
 			myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.5));
 		}
@@ -57,11 +59,15 @@ private:
 		myRobot.MecanumDrive_Cartesian(stick.GetX(), stick.GetY(), stick.GetTwist());
 
 		// cube intake motor's "on" button
-		if(stick.GetRawButton(7)) buttonEnabled = true;
+		if(stick.GetRawButton(7)) {
+			buttonEnabled = true;
+		}
 		// "off" button
-		else if(stick.GetRawButton(9)) buttonEnabled = false;
+		else if(stick.GetRawButton(9)) {
+			buttonEnabled = false;
+		}
 
-		// joystick button 7 is pressed, set to joystick slider's manual control (-1.0 – +1.0)
+		// Set to joystick slider's manual control (-1.0 - +1.0)
 		if(buttonEnabled) {
 			leftGrabber.Set(stick.GetThrottle());
 			rightGrabber.Set(stick.GetThrottle());
