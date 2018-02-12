@@ -31,6 +31,7 @@ private:
 	static constexpr int kFrontRightChannel = 1;
 	static constexpr int kRearRightChannel = 0;
 	bool buttonEnabled = false; // checks if the cube intake motors are on
+	int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3, representing driver station number
 
 	void AutonomousInit() override {
 		timer.Reset();
@@ -40,7 +41,28 @@ private:
 		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage();
 	}
 
+	//TODO: Calculate time and movement measurements!
 	void AutonomousPeriodic() override {
+		if(gameData[0] == "L") { // left switch
+			if(station == 1) { // left driver station
+
+			} else if(station == 2) { // middle driver station
+
+			} else if(station == 3) { // right driver station
+
+			}
+
+		} else if(gameData[0] == "R") { // right switch
+			if(station == 1) { // left driver station
+
+			} else if(station == 2) { // middle driver station
+
+			} else if(station == 3) { // right driver station
+
+			}
+		}
+
+		/*
 		if (timer.Get() < 2.0) {
 			myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
 			//Percentage of Power along a specific Axis
@@ -48,6 +70,7 @@ private:
 		} else {
 			myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.5));
 		}
+		*/
 	}
 
 	void TeleopInit() override {
