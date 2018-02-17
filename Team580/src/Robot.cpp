@@ -8,15 +8,21 @@
 
 class Robot: public frc::IterativeRobot {
 public:
-	Robot(): myRobot(kFrontLeftChannel, kRearLeftChannel, kFrontRightChannel, kRearRightChannel),
+	Robot(): myRobot(frontLeft, rearLeft, frontRight, rearRight),
 	stick(0),
 	lw(frc::LiveWindow::GetInstance()),
 	timer(),
+	frontLeft(2),
+	rearLeft(3),
+	frontRight(1),
+	rearRight(0),
 	leftGrabber(4), // port 4
 	rightGrabber(5) // port 5
 {
 		myRobot.SetExpiration(0.1);
 		timer.Start();
+		//frontLeft.SetInverted(true);
+		//rearLeft.SetInverted(true);
 }
 
 private:
@@ -26,10 +32,14 @@ private:
 	frc::Timer timer;
 	frc::Talon leftGrabber; // cube intake left motor
 	frc::Talon rightGrabber; // cube intake right motor
-	static constexpr int kFrontLeftChannel = 2;
-	static constexpr int kRearLeftChannel = 3;
-	static constexpr int kFrontRightChannel = 1;
-	static constexpr int kRearRightChannel = 0;
+	frc::Talon frontLeft;
+	frc::Talon rearLeft;
+	frc::Talon frontRight;
+	frc::Talon rearRight;
+	// static constexpr int kFrontLeftChannel = 2;
+	// static constexpr int kRearLeftChannel = 3;
+	// static constexpr int kFrontRightChannel = 1;
+	// static constexpr int kRearRightChannel = 0;
 	bool buttonEnabled = false; // checks if the cube intake motors are on
 	int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3, representing driver station number
 
@@ -41,7 +51,7 @@ private:
 		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage();
 	}
 
-	//TODO: Calculate time and movement measurements!
+	//TODO: Calculate measurements!
 	void AutonomousPeriodic() override {
 		if(gameData[0] == "L") { // left switch
 			if(station == 1) { // left driver station
@@ -89,7 +99,6 @@ private:
 		else if(stick.GetRawButton(9)) {
 			buttonEnabled = false;
 		}
-
 		// Set to joystick slider's manual control (-1.0 - +1.0)
 		if(buttonEnabled) {
 			leftGrabber.Set(stick.GetThrottle());
