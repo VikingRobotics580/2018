@@ -42,45 +42,59 @@ private:
 	// static constexpr int kRearRightChannel = 0;
 	bool buttonEnabled = false; // checks if the cube intake motors are on
 	int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3, representing driver station number
+	std::string gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // is the switch in the left or right position?
 
 	void AutonomousInit() override {
 		timer.Reset();
 		timer.Start();
-		//FMS data
-		std::string gameData;
-		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage();
 	}
 
 	//TODO: Calculate measurements!
+	// X = left & right, Y = forward & backward, Twist = rotate
+	// myRobot.MecanumDrive_Cartesian(X, Y, Twist)
 	void AutonomousPeriodic() override {
-		if(gameData[0] == "L") { // left switch
+		if(gameData[0] == 'L') { // left switch
 			if(station == 1) { // left driver station
+				if(timer.Get() < 4.0) {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
+				} else {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
 
+				}
 			} else if(station == 2) { // middle driver station
-
+				if(timer.Get() < 2.0) {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
+				} else {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+				}
 			} else if(station == 3) { // right driver station
-
+				if(timer.Get() < 3.0) {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
+				} else {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+				}
 			}
-
-		} else if(gameData[0] == "R") { // right switch
+		} else if(gameData[0] == 'R') { // right switch
 			if(station == 1) { // left driver station
-
+				if(timer.Get() < 4.0) {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
+				} else {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+				}
 			} else if(station == 2) { // middle driver station
-
+				if(timer.Get() < 2.0) {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
+				} else {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+				}
 			} else if(station == 3) { // right driver station
-
+				if(timer.Get() < 3.0) {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
+				} else {
+					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+				}
 			}
 		}
-
-		/*
-		if (timer.Get() < 2.0) {
-			myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-			//Percentage of Power along a specific Axis
-			//X = left & right, Y = forward & backward, Twist = rotate
-		} else {
-			myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.5));
-		}
-		*/
 	}
 
 	void TeleopInit() override {
@@ -88,7 +102,6 @@ private:
 	}
 
 	void TeleopPeriodic() override {
-		//myRobot.ArcadeDrive(stick);
 		myRobot.MecanumDrive_Cartesian(stick.GetX(), stick.GetY(), stick.GetTwist());
 
 		// cube intake motor's "on" button
