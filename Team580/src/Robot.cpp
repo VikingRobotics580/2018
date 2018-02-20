@@ -1,98 +1,90 @@
-#include <wpilib.h>
+#include <DriverStation.h>
+#include <Drive/MecanumDrive.h>
 #include <IterativeRobot.h>
 #include <Joystick.h>
-#include <Buttons/JoystickButton.h>
-#include <LiveWindow/LiveWindow.h>
-#include <RobotDrive.h>
+#include <Spark.h>
+#include <Talon.h>
 #include <Timer.h>
 
-class Robot: public frc::IterativeRobot {
+class Robot : public frc::IterativeRobot {
 public:
-	Robot(): myRobot(frontLeft, rearLeft, frontRight, rearRight),
-	stick(0),
-	lw(frc::LiveWindow::GetInstance()),
-	timer(),
-	frontLeft(2),
-	rearLeft(3),
-	frontRight(1),
-	rearRight(0),
-	leftGrabber(4), // port 4
-	rightGrabber(5) // port 5
+	Robot():
+		timer(),
+		leftGrabber(4),
+		rightGrabber(5),
+		leftClimber(6),
+		rightClimber(7)
 {
-		myRobot.SetExpiration(0.1);
-		timer.Start();
-		//frontLeft.SetInverted(true);
-		//rearLeft.SetInverted(true);
-}
 
-private:
-	frc::RobotDrive myRobot;
-	frc::Joystick stick;
-	frc::LiveWindow* lw;
-	frc::Timer timer;
-	frc::Talon leftGrabber; // cube intake left motor
-	frc::Talon rightGrabber; // cube intake right motor
-	frc::Talon frontLeft;
-	frc::Talon rearLeft;
-	frc::Talon frontRight;
-	frc::Talon rearRight;
-	// static constexpr int kFrontLeftChannel = 2;
-	// static constexpr int kRearLeftChannel = 3;
-	// static constexpr int kFrontRightChannel = 1;
-	// static constexpr int kRearRightChannel = 0;
-	bool buttonEnabled = false; // checks if the cube intake motors are on
-	int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3, representing driver station number
-	std::string gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // is the switch in the left or right position?
+}
+	void RobotInit() {
+		// Invert the left side motors
+		frontLeft.SetInverted(true);
+		rearLeft.SetInverted(true);
+		robotDrive.SetSafetyEnabled(false);
+	}
 
 	void AutonomousInit() override {
 		timer.Reset();
 		timer.Start();
 	}
 
-	//TODO: Calculate measurements!
-	// X = left & right, Y = forward & backward, Twist = rotate
-	// myRobot.MecanumDrive_Cartesian(X, Y, Twist)
+	//TODO: Calculate autonomous measurements!
+	/*
+	 * X = left & right, Y = forward & backward, rotation = Z value
+	 * robotDrive.DriveCartesian(X, Y, rotation)
+	 */
 	void AutonomousPeriodic() override {
-		if(gameData[0] == 'L') { // left switch
-			if(station == 1) { // left driver station
-				if(timer.Get() < 4.0) {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-				} else {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+		std::string gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // left or right switch?
+		int station = 1; // for now, we will manually change the station number for testing purposes
+		//frc::DriverStation::GetInstance().GetLocation(); // returns 1-3, representing driver station number
+
+		if(gameData.length() > 0) {
+			if(gameData[0] == 'L') { // left switch
+
+				if(station == 1) { // leftmost driver station; aim for first switch!
 
 				}
-			} else if(station == 2) { // middle driver station
-				if(timer.Get() < 2.0) {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-				} else {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+
+				else if(station == 2) { // middle driver station
+
 				}
-			} else if(station == 3) { // right driver station
-				if(timer.Get() < 3.0) {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-				} else {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+
+				else if(station == 3) { // farthest driver station from switch; aim for scale!
+
 				}
-			}
-		} else if(gameData[0] == 'R') { // right switch
-			if(station == 1) { // left driver station
-				if(timer.Get() < 4.0) {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-				} else {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+
+				/*
+				 * USE FOR FMS FAILURE ONLY (crosses auto line)
+				 * 	if(timer.Get() < 2.0) {
+						robotDrive.DriveCartesian((0.0),(-0.75),(0.0));
+					} else {
+						robotDrive.DriveCartesian((0.0),(0.0),(0.0));
+					}
+				 */
+
+			} else if(gameData[0] == 'R') { // right switch
+
+				if(station == 1) { // leftmost driver station; aim for scale!
+
 				}
-			} else if(station == 2) { // middle driver station
-				if(timer.Get() < 2.0) {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-				} else {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+
+				else if(station == 2) { // middle driver station
+
 				}
-			} else if(station == 3) { // right driver station
-				if(timer.Get() < 3.0) {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-				} else {
-					myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
+
+				else if(station == 3) { // rightmost driver station; aim for first switch!
+
 				}
+
+				/*
+				 * USE FOR FMS FAILURE ONLY (crosses auto line)
+				 * 	if(timer.Get() < 2.0) {
+						robotDrive.DriveCartesian((0.0),(-0.75),(0.0));
+					} else {
+						robotDrive.DriveCartesian((0.0),(0.0),(0.0));
+					}
+				 */
 			}
 		}
 	}
@@ -102,28 +94,56 @@ private:
 	}
 
 	void TeleopPeriodic() override {
-		myRobot.MecanumDrive_Cartesian(stick.GetX(), stick.GetY(), stick.GetTwist());
+		// Z axis is flipped so the direction it is tilted in is also the same direction as the robot's movement
+		robotDrive.DriveCartesian(stick.GetX(), stick.GetY(), -(stick.GetZ()));
 
-		// cube intake motor's "on" button
-		if(stick.GetRawButton(7)) {
+		if(stick.GetRawButton(7)) {	// cube intake motor's "on" button
 			buttonEnabled = true;
 		}
-		// "off" button
-		else if(stick.GetRawButton(9)) {
+		else if(stick.GetRawButton(9)) { // "off" button
 			buttonEnabled = false;
 		}
 		// Set to joystick slider's manual control (-1.0 - +1.0)
 		if(buttonEnabled) {
 			leftGrabber.Set(stick.GetThrottle());
 			rightGrabber.Set(stick.GetThrottle());
-		} else { // otherwise, set the speed to 0 (turn off the motors)
+		} else { // otherwise, turn off the motors
 			leftGrabber.Set(0);
 			rightGrabber.Set(0);
 		}
+		if(stick.GetRawButton(11)) { // climb downwards
+			rightClimber.Set(0.5);
+			leftClimber.Set(0.5);
+		} else if(stick.GetRawButton(12)) { // climb upwards
+			rightClimber.Set(-0.5);
+			leftClimber.Set(-0.5);
+		} else if(stick.GetRawButton(10)) { // climber motor off
+			rightClimber.Set(0);
+			leftClimber.Set(0);
+		}
 	}
 
-	void TestPeriodic() override {
-		lw->Run();
-	}
+private:
+	static constexpr int kFrontLeftChannel = 0;
+	static constexpr int kRearLeftChannel = 1;
+	static constexpr int kFrontRightChannel = 2;
+	static constexpr int kRearRightChannel = 3;
+	static constexpr int kJoystickChannel = 0;
+
+	// The port channels initialized above are passed into the brackets, giving the motor its channel number
+	frc::Spark frontLeft{kFrontLeftChannel};
+	frc::Spark rearLeft{kRearLeftChannel};
+	frc::Spark frontRight{kFrontRightChannel};
+	frc::Spark rearRight{kRearRightChannel};
+	frc::MecanumDrive robotDrive{frontLeft, rearLeft, frontRight, rearRight};
+	frc::Joystick stick{kJoystickChannel};
+
+	frc::Talon leftClimber; // left climber motor
+	frc::Talon rightClimber; // right climber motor
+	frc::Talon leftGrabber; // cube intake left motor
+	frc::Talon rightGrabber; // cube intake right motor
+	frc::Timer timer; // autonomous timer
+	bool buttonEnabled = false; // checks if the cube intake button is on
 };
+
 START_ROBOT_CLASS(Robot)
