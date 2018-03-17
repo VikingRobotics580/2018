@@ -10,6 +10,7 @@ class Robot : public frc::IterativeRobot {
 public:
 	Robot():
 		timer(),
+		//station(),
 		leftGrabber(4),
 		rightGrabber(5),
 		leftClimber(6),
@@ -20,138 +21,196 @@ public:
 }
 	void RobotInit() {
 		// Invert the left side motors
-		m_frontLeft.SetInverted(true);
-		m_rearLeft.SetInverted(true);
+		//m_frontLeft.SetInverted(true);
+		//m_rearLeft.SetInverted(true);
 		m_robotDrive.SetSafetyEnabled(false);
+	}
+
+	void moveForward(double speed) {
+		m_robotDrive.DriveCartesian((0.0),(speed),(0.0));
+	}
+
+	void rotateRight() {
+		m_robotDrive.DriveCartesian((0.0),(0.0),(-0.5));
+	}
+
+	void rotateLeft() {
+		m_robotDrive.DriveCartesian((0.0),(0.0),(0.5));
+	}
+
+	void shootCube() {
+		leftGrabber.Set(-1);
+		rightGrabber.Set(1);
+		fluxCapacitor.Set(0.5);
+	}
+
+	void stopShooter() {
+		leftGrabber.Set(0);
+		rightGrabber.Set(0);
+	}
+
+	void motionless() {
+		m_robotDrive.DriveCartesian((0.0),(0.0),(0.0));
 	}
 
 	void AutonomousInit() override {
 		timer.Reset();
 		timer.Start();
+		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // left or right switch?
+		//int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3: driver station number
 	}
 
-	//TODO: Calculate measurements!
 	// X = left & right, Y = forward & backward, rotation = Z value
 	// m_robotDrive.DriveCartesian(X, Y, rotation)
 	void AutonomousPeriodic() override {
-		std::string gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // left or right switch?
-		int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3, representing driver station number
-
+		station = 3; // test purposes
 		if(gameData.length() > 0) {
-			if(gameData[0] == 'L') { // left switch
-				if(timer.Get() < 1.0) {
-					m_robotDrive.DriveCartesian((0.0),(-0.5),(0.0));
-				} else {
-					m_robotDrive.DriveCartesian((0.0),(0.0),(0.0));
+			if(gameData[0] == 'L') { // left scale
+				if(station == 1) { // left station
+					if(timer.Get() < 3.0) {
+						moveForward(-0.5);
+						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+						rotateRight();
+					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
+						moveForward(-0.4);
+					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
+						shootCube();
+					} else {
+						stopShooter();
+						motionless();
+						winch.Set(0);
+					}
+
+				} else if(station == 2) { // middle station
+					if(timer.Get() < 1.0) {
+						moveForward(-0.5);
+						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+					} else if(timer.Get() > 1.5 && timer.Get() < 2.25) {
+						rotateLeft();
+					} else if(timer.Get() > 3.0 && timer.Get() < 5.0) {
+						moveForward(-0.5);
+					} else if(timer.Get() > 5.5 && timer.Get() < 6.25) {
+						rotateRight();
+					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
+						moveForward(-0.5);
+					} else if(timer.Get() > 8.5 && timer.Get() < 9.25) {
+						rotateRight();
+					} else if(timer.Get() > 10.0 && timer.Get() < 11.0) {
+						moveForward(-0.25);
+					} else if(timer.Get() > 11.5 && timer.Get() < 12.5) {
+						shootCube();
+					} else {
+						stopShooter();
+						motionless();
+						winch.Set(0);
+					}
+
+				} else if(station == 3) { // right station
+					if(timer.Get() < 4.0) {
+						moveForward(-0.5);
+						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+					} else {
+						motionless();
+					}
 				}
-			} else if(gameData[0] == 'R') { // right switch
-				if(timer.Get() < 2.0) {
-					m_robotDrive.DriveCartesian((0.0),(-0.25),(0.0));
-				} else {
-					m_robotDrive.DriveCartesian((0.0),(0.0),(0.0));
+
+			} else if(gameData[0] == 'R') { // right scale
+				if(station == 1) { // left switch
+					if(timer.Get() < 4.0) {
+						moveForward(-0.5);
+					} else {
+						motionless();
+					}
+
+				} else if(station == 2) { // middle station
+					if(timer.Get() < 1.0) {
+						moveForward(-0.5);
+						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+					} else if(timer.Get() > 1.5 && timer.Get() < 2.0) {
+						rotateRight();
+					} else if(timer.Get() > 2.5 && timer.Get() < 3.5) {
+						moveForward(-0.5);
+					} else if(timer.Get() > 4.0 && timer.Get() < 5.0) {
+						rotateLeft();
+					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
+						moveForward(-0.5);
+					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
+						rotateLeft();
+					} else if(timer.Get() > 8.5 && timer.Get() < 9.5) {
+						moveForward(-0.25);
+					} else if(timer.Get() > 10.0 && timer.Get() < 11.0) {
+						shootCube();
+					} else {
+						stopShooter();
+						motionless();
+						winch.Set(0);
+					}
+
+				} else if(station == 3) { // right station
+					if(timer.Get() < 3.0) {
+						moveForward(-0.5);
+						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+						rotateLeft();
+					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
+						moveForward(-0.4);
+					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
+						shootCube();
+					} else {
+						stopShooter();
+						motionless();
+						winch.Set(0);
+					}
 				}
 			}
 		}
-		/*
-		        if(gameData[0] == 'L') { // left switch
-		            if(station == 1) { // left driver station
-		                if(timer.Get() < 4.0) {
-		                    myRobot->MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-		                } else {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
-		                }
-		            } else if(station == 2) { // middle driver station
-		                if(timer.Get() < 2.0) {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-		                } else {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
-		                }
-		            } else if(station == 3) { // right driver station
-		                if(timer.Get() < 3.0) {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-		                } else {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
-		                }
-		            }
-		        } else if(gameData[0] == 'R') { // right switch
-		            if(station == 1) { // left driver station
-		                if(timer.Get() < 4.0) {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-		                } else {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
-		                }
-		            } else if(station == 2) { // middle driver station
-		                if(timer.Get() < 2.0) {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-		                } else {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
-		                }
-		            } else if(station == 3) { // right driver station
-		                if(timer.Get() < 3.0) {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.5),(0.0));
-		                } else {
-		                    myRobot.MecanumDrive_Cartesian((0.0),(0.0),(0.0));
-		                }
-		            }
-		        } */
 	}
 
 	void TeleopInit() override {
-
+		//m_robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
 	}
 
 	void TeleopPeriodic() override {
-		// Z axis is flipped so the direction it is tilted in is also the same direction as the robot's movement
+		// Use the joystick X axis for lateral movement, Y axis for forward movement, and Z axis for rotation.
 		m_robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
 
-		if(leftJoystick.GetRawButton(1)) { // open cube grabber
+		if(leftJoystick.GetRawButton(9)) { // open cube grabber
 			fluxCapacitor.Set(0.5);
-		} else if(leftJoystick.GetRawButton(2)) { // close cube grabber
+		} else if(leftJoystick.GetRawButton(10)) { // close cube grabber
 			fluxCapacitor.Set(-0.5);
 		} else {
 			fluxCapacitor.Set(0);
 		}
 
-		if(leftJoystick.GetRawButton(5)) { // shoot out cube
+		if(leftJoystick.GetRawButton(2)) { // "suck in" cube
+			//fluxCapacitor.Set(0.5);
 			leftGrabber.Set(1);
 			rightGrabber.Set(-1);
-		} else if(leftJoystick.GetRawButton(6)) { // receive cube
+		} else if(leftJoystick.GetRawButton(1)) { // shoot out cube
 			leftGrabber.Set(-1);
 			rightGrabber.Set(1);
 		} else { // turn off motors
+			//fluxCapacitor.Set(0);
 			leftGrabber.Set(0);
 			rightGrabber.Set(0);
 		}
 
-		/* if(m_stick.GetRawButton(7)) { // cube intake motor's "on" button
-			buttonEnabled = true;
-		} else if(m_stick.GetRawButton(9)) { // "off" button
-			buttonEnabled = false;
-		}
-
-		if(buttonEnabled) { // Set to joystick slider's manual control (-1.0 - +1.0)
-			leftGrabber.Set(m_stick.GetThrottle());
-			rightGrabber.Set(m_stick.GetThrottle());
-		} else { // turn off the motors
-			leftGrabber.Set(0);
-			rightGrabber.Set(0);
-		} */
-
-		if(rightJoystick.GetRawButton(11)) { // climber down
-			rightClimber.Set(0.5);
-			leftClimber.Set(0.5);
-		} else if(rightJoystick.GetRawButton(12)) { // climber up
-			rightClimber.Set(-0.5);
-			leftClimber.Set(-0.5);
+		if(rightJoystick.GetRawButton(11)) { // climb down
+			rightClimber.Set(1);
+			leftClimber.Set(1);
+		} else if(rightJoystick.GetRawButton(12)) { // climb up
+			rightClimber.Set(-1);
+			leftClimber.Set(-1);
 		} else if(rightJoystick.GetRawButton(10)) { // climber motor off
 			rightClimber.Set(0);
 			leftClimber.Set(0);
 		}
 
-		if(leftJoystick.GetRawButton(3)) { // Winch climb up
-			winch.Set(0.75f);
-		} else if(leftJoystick.GetRawButton(4)) { // Winch climb down
-			winch.Set(-0.75f);
+		if(leftJoystick.GetRawButton(3)) { // winch climb up
+			winch.Set(1);
+		} else if(leftJoystick.GetRawButton(4)) { // winch climb down
+			winch.Set(-1);
 		} else { // winch motor off
 			winch.Set(0.0f);
 		}
@@ -179,6 +238,8 @@ private:
 	frc::Talon fluxCapacitor;
 	frc::Talon winch;
 	frc::Timer timer;
+	int station;
+	std::string gameData;
 	bool buttonEnabled = false;
 };
 
