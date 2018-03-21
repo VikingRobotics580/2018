@@ -10,7 +10,6 @@ class Robot : public frc::IterativeRobot {
 public:
 	Robot():
 		timer(),
-		//station(),
 		leftGrabber(4),
 		rightGrabber(5),
 		leftClimber(6),
@@ -20,9 +19,6 @@ public:
 {
 }
 	void RobotInit() {
-		// Invert the left side motors
-		//m_frontLeft.SetInverted(true);
-		//m_rearLeft.SetInverted(true);
 		m_robotDrive.SetSafetyEnabled(false);
 	}
 
@@ -74,12 +70,10 @@ public:
 						rotateRight();
 					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
 						moveForward(-0.4);
-					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
+					} else if(timer.Get() > 7.0 && timer.Get() < 9.0) {
 						shootCube();
 					} else {
-						stopShooter();
 						motionless();
-						winch.Set(0);
 					}
 
 				} else if(station == 2) { // middle station
@@ -103,7 +97,6 @@ public:
 					} else {
 						stopShooter();
 						motionless();
-						winch.Set(0);
 					}
 
 				} else if(station == 3) { // right station
@@ -139,29 +132,26 @@ public:
 						rotateLeft();
 					} else if(timer.Get() > 8.5 && timer.Get() < 9.5) {
 						moveForward(-0.25);
-					} else if(timer.Get() > 10.0 && timer.Get() < 11.0) {
+					} else if(timer.Get() > 10.0 && timer.Get() < 12.0) {
 						shootCube();
 					} else {
 						stopShooter();
 						motionless();
-						winch.Set(0);
 					}
 
 				} else if(station == 3) { // right station
-					if(timer.Get() < 3.0) {
-						moveForward(-0.5);
-						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
-					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
-						rotateLeft();
-					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
-						moveForward(-0.4);
-					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
-						shootCube();
-					} else {
-						stopShooter();
-						motionless();
-						winch.Set(0);
-					}
+						if(timer.Get() < 3.0) {
+							moveForward(-0.5);
+							//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+						} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+							rotateLeft();
+						} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
+							moveForward(-0.4);
+						} else if(timer.Get() > 7.0 && timer.Get() < 9.0) {
+							shootCube();
+						} else {
+							motionless();
+						}
 				}
 			}
 		}
@@ -184,14 +174,12 @@ public:
 		}
 
 		if(leftJoystick.GetRawButton(2)) { // "suck in" cube
-			//fluxCapacitor.Set(0.5);
 			leftGrabber.Set(1);
 			rightGrabber.Set(-1);
 		} else if(leftJoystick.GetRawButton(1)) { // shoot out cube
 			leftGrabber.Set(-1);
 			rightGrabber.Set(1);
 		} else { // turn off motors
-			//fluxCapacitor.Set(0);
 			leftGrabber.Set(0);
 			rightGrabber.Set(0);
 		}
@@ -240,7 +228,6 @@ private:
 	frc::Timer timer;
 	int station;
 	std::string gameData;
-	bool buttonEnabled = false;
 };
 
 START_ROBOT_CLASS(Robot)
