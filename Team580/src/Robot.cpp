@@ -5,6 +5,7 @@
 #include <IterativeRobot.h>
 #include <Joystick.h>
 #include <Spark.h>
+//#include <ADXRS450_Gyro.h>
 
 class Robot : public frc::IterativeRobot {
 public:
@@ -18,10 +19,6 @@ public:
 		winch(9)
 {
 }
-	void RobotInit() {
-		m_robotDrive.SetSafetyEnabled(false);
-	}
-
 	void moveForward(double speed) {
 		m_robotDrive.DriveCartesian((0.0),(speed),(0.0));
 	}
@@ -49,6 +46,14 @@ public:
 		m_robotDrive.DriveCartesian((0.0),(0.0),(0.0));
 	}
 
+	void middleApproach(double x, double y) { // can adjust x and y values
+		m_robotDrive.DriveCartesian((x),(y),(0.0));
+	}
+
+	void RobotInit() {
+		m_robotDrive.SetSafetyEnabled(false);
+	}
+
 	void AutonomousInit() override {
 		timer.Reset();
 		timer.Start();
@@ -56,10 +61,9 @@ public:
 		//int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3: driver station number
 	}
 
-	// X = left & right, Y = forward & backward, rotation = Z value
 	// m_robotDrive.DriveCartesian(X, Y, rotation)
 	void AutonomousPeriodic() override {
-		station = 3; // test purposes
+		station = 2; // test purposes
 		if(gameData.length() > 0) {
 			if(gameData[0] == 'L') { // left scale
 				if(station == 1) { // left station
@@ -75,83 +79,104 @@ public:
 					} else {
 						motionless();
 					}
-
 				} else if(station == 2) { // middle station
-					if(timer.Get() < 1.0) {
+					if(timer.Get() < 1.5) {
 						moveForward(-0.5);
-						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
 					} else if(timer.Get() > 1.5 && timer.Get() < 2.25) {
 						rotateLeft();
-					} else if(timer.Get() > 3.0 && timer.Get() < 5.0) {
+					} else if(timer.Get() > 2.5 && timer.Get() < 5.0) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 5.5 && timer.Get() < 6.25) {
+					} else if(timer.Get() > 5.0 && timer.Get() < 5.75) {
 						rotateRight();
-					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
+					} else if(timer.Get() > 5.75 && timer.Get() < 6.75) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 8.5 && timer.Get() < 9.25) {
+					} else if(timer.Get() > 6.75 && timer.Get() < 7.5) {
 						rotateRight();
-					} else if(timer.Get() > 10.0 && timer.Get() < 11.0) {
-						moveForward(-0.25);
-					} else if(timer.Get() > 11.5 && timer.Get() < 12.5) {
+					} else if(timer.Get() > 7.5 && timer.Get() < 8.5) {
+						moveForward(-0.4);
+					} else if(timer.Get() > 8.5 && timer.Get() < 10.5) {
 						shootCube();
 					} else {
-						stopShooter();
 						motionless();
 					}
 
 				} else if(station == 3) { // right station
-					if(timer.Get() < 4.0) {
+					if(timer.Get() < 4.5) {
 						moveForward(-0.5);
-						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+					} else if(timer.Get() > 4.5 && timer.Get() < 5.5) {
+						rotateLeft();
+					} else if(timer.Get() > 6.0 && timer.Get() < 11.0) {
+						moveForward(-0.5);
+					} else if(timer.Get() > 11.0 && timer.Get() < 11.75) {
+						rotateLeft();
+					} else if(timer.Get() > 12.0 && timer.Get() < 13.0) {
+						moveForward(-0.4);
+					} else if(timer.Get() > 13.0 && timer.Get() < 13.75) {
+						rotateLeft();
+					} else if(timer.Get() > 13.75 && timer.Get() < 14.75) {
+						moveForward(-0.5);
 					} else {
+						shootCube();
 						motionless();
 					}
 				}
 
 			} else if(gameData[0] == 'R') { // right scale
 				if(station == 1) { // left switch
-					if(timer.Get() < 4.0) {
+					if(timer.Get() < 4.5) {
+						moveForward(-0.5);
+					}
+					/* else if(timer.Get() > 4.5 && timer.Get() < 5.5) {
+						rotateRight();
+					} else if(timer.Get() > 6.0 && timer.Get() < 11.0) {
+						moveForward(-0.5);
+					} else if(timer.Get() > 11.0 && timer.Get() < 11.75) {
+						rotateRight();
+					} else if(timer.Get() > 12.0 && timer.Get() < 13.0) {
+						moveForward(-0.4);
+					} else if(timer.Get() > 13.0 && timer.Get() < 13.75) {
+						rotateRight();
+					} else if(timer.Get() > 13.75 && timer.Get() < 14.75) {
 						moveForward(-0.5);
 					} else {
+						shootCube();
 						motionless();
-					}
+					} */
 
 				} else if(station == 2) { // middle station
-					if(timer.Get() < 1.0) {
+					if(timer.Get() < 1.5) {
 						moveForward(-0.5);
-						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
-					} else if(timer.Get() > 1.5 && timer.Get() < 2.0) {
+					} else if(timer.Get() > 1.5 && timer.Get() < 2.25) {
 						rotateRight();
-					} else if(timer.Get() > 2.5 && timer.Get() < 3.5) {
+					} else if(timer.Get() > 2.5 && timer.Get() < 5.0) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 4.0 && timer.Get() < 5.0) {
+					} else if(timer.Get() > 5.0 && timer.Get() < 5.75) {
 						rotateLeft();
-					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
+					} else if(timer.Get() > 5.75 && timer.Get() < 6.75) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 7.0 && timer.Get() < 8.0) {
+					} else if(timer.Get() > 6.75 && timer.Get() < 7.5) {
 						rotateLeft();
-					} else if(timer.Get() > 8.5 && timer.Get() < 9.5) {
-						moveForward(-0.25);
-					} else if(timer.Get() > 10.0 && timer.Get() < 12.0) {
+					} else if(timer.Get() > 7.5 && timer.Get() < 8.5) {
+						moveForward(-0.4);
+					} else if(timer.Get() > 8.5 && timer.Get() < 10.5) {
 						shootCube();
 					} else {
-						stopShooter();
 						motionless();
 					}
 
 				} else if(station == 3) { // right station
-						if(timer.Get() < 3.0) {
-							moveForward(-0.5);
-							//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
-						} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
-							rotateLeft();
-						} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
-							moveForward(-0.4);
-						} else if(timer.Get() > 7.0 && timer.Get() < 9.0) {
-							shootCube();
-						} else {
-							motionless();
-						}
+					if(timer.Get() < 3.0) {
+						moveForward(-0.5);
+						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
+					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+						rotateLeft();
+					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
+						moveForward(-0.4);
+					} else if(timer.Get() > 7.0 && timer.Get() < 9.0) {
+						shootCube();
+					} else {
+						motionless();
+					}
 				}
 			}
 		}
@@ -163,6 +188,7 @@ public:
 
 	void TeleopPeriodic() override {
 		// Use the joystick X axis for lateral movement, Y axis for forward movement, and Z axis for rotation.
+		//m_robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
 		m_robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
 
 		if(leftJoystick.GetRawButton(9)) { // open cube grabber
@@ -218,7 +244,6 @@ private:
 	frc::MecanumDrive m_robotDrive{m_frontLeft, m_rearLeft, m_frontRight, m_rearRight};
 	frc::Joystick leftJoystick{joyChannel};
 	frc::Joystick rightJoystick{joyChannel2};
-
 	frc::Talon leftClimber;
 	frc::Talon rightClimber;
 	frc::Talon leftGrabber;
@@ -228,6 +253,6 @@ private:
 	frc::Timer timer;
 	int station;
 	std::string gameData;
+	//ADXRS450_Gyro gyro;
 };
-
 START_ROBOT_CLASS(Robot)
