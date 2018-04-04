@@ -46,10 +46,6 @@ public:
 		m_robotDrive.DriveCartesian((0.0),(0.0),(0.0));
 	}
 
-	void middleApproach(double x, double y) { // can adjust x and y values
-		m_robotDrive.DriveCartesian((x),(y),(0.0));
-	}
-
 	void RobotInit() {
 		m_robotDrive.SetSafetyEnabled(false);
 	}
@@ -58,12 +54,10 @@ public:
 		timer.Reset();
 		timer.Start();
 		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // left or right switch?
-		//int station = frc::DriverStation::GetInstance().GetLocation(); // returns 1-3: driver station number
 	}
 
-	// m_robotDrive.DriveCartesian(X, Y, rotation)
 	void AutonomousPeriodic() override {
-		station = 2; // test purposes
+		station = 1; // test purposes
 		if(gameData.length() > 0) {
 			if(gameData[0] == 'L') { // left scale
 				if(station == 1) { // left station
@@ -80,85 +74,50 @@ public:
 						motionless();
 					}
 				} else if(station == 2) { // middle station
-					if(timer.Get() < 1.5) {
+					if(timer.Get() < 1.0) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 1.5 && timer.Get() < 2.25) {
+					} else if(timer.Get() > 1.25 && timer.Get() < 2.0) {
 						rotateLeft();
-					} else if(timer.Get() > 2.5 && timer.Get() < 5.0) {
+					} else if(timer.Get() > 2.5 && timer.Get() < 3.5) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 5.0 && timer.Get() < 5.75) {
+					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
 						rotateRight();
-					} else if(timer.Get() > 5.75 && timer.Get() < 6.75) {
-						moveForward(-0.5);
-					} else if(timer.Get() > 6.75 && timer.Get() < 7.5) {
-						rotateRight();
-					} else if(timer.Get() > 7.5 && timer.Get() < 8.5) {
+					} else if(timer.Get() > 5.0 && timer.Get() < 6.0) {
 						moveForward(-0.4);
-					} else if(timer.Get() > 8.5 && timer.Get() < 10.5) {
+					} else if(timer.Get() > 6.0 && timer.Get() < 8.0) {
 						shootCube();
 					} else {
 						motionless();
 					}
 
 				} else if(station == 3) { // right station
-					if(timer.Get() < 4.5) {
-						moveForward(-0.5);
-					} else if(timer.Get() > 4.5 && timer.Get() < 5.5) {
-						rotateLeft();
-					} else if(timer.Get() > 6.0 && timer.Get() < 11.0) {
-						moveForward(-0.5);
-					} else if(timer.Get() > 11.0 && timer.Get() < 11.75) {
-						rotateLeft();
-					} else if(timer.Get() > 12.0 && timer.Get() < 13.0) {
-						moveForward(-0.4);
-					} else if(timer.Get() > 13.0 && timer.Get() < 13.75) {
-						rotateLeft();
-					} else if(timer.Get() > 13.75 && timer.Get() < 14.75) {
+					if(timer.Get() < 3.0) {
 						moveForward(-0.5);
 					} else {
-						shootCube();
 						motionless();
 					}
 				}
 
 			} else if(gameData[0] == 'R') { // right scale
 				if(station == 1) { // left switch
-					if(timer.Get() < 4.5) {
-						moveForward(-0.5);
-					}
-					/* else if(timer.Get() > 4.5 && timer.Get() < 5.5) {
-						rotateRight();
-					} else if(timer.Get() > 6.0 && timer.Get() < 11.0) {
-						moveForward(-0.5);
-					} else if(timer.Get() > 11.0 && timer.Get() < 11.75) {
-						rotateRight();
-					} else if(timer.Get() > 12.0 && timer.Get() < 13.0) {
-						moveForward(-0.4);
-					} else if(timer.Get() > 13.0 && timer.Get() < 13.75) {
-						rotateRight();
-					} else if(timer.Get() > 13.75 && timer.Get() < 14.75) {
+					if(timer.Get() < 3.0) {
 						moveForward(-0.5);
 					} else {
-						shootCube();
 						motionless();
-					} */
+					}
 
 				} else if(station == 2) { // middle station
-					if(timer.Get() < 1.5) {
+					if(timer.Get() < 1.0) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 1.5 && timer.Get() < 2.25) {
+					} else if(timer.Get() > 1.25 && timer.Get() < 2.0) {
 						rotateRight();
-					} else if(timer.Get() > 2.5 && timer.Get() < 5.0) {
+					} else if(timer.Get() > 2.5 && timer.Get() < 3.5) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 5.0 && timer.Get() < 5.75) {
+					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
 						rotateLeft();
-					} else if(timer.Get() > 5.75 && timer.Get() < 6.75) {
-						moveForward(-0.5);
-					} else if(timer.Get() > 6.75 && timer.Get() < 7.5) {
-						rotateLeft();
-					} else if(timer.Get() > 7.5 && timer.Get() < 8.5) {
+					} else if(timer.Get() > 5.0 && timer.Get() < 6.0) {
 						moveForward(-0.4);
-					} else if(timer.Get() > 8.5 && timer.Get() < 10.5) {
+					} else if(timer.Get() > 6.0 && timer.Get() < 8.0) {
 						shootCube();
 					} else {
 						motionless();
@@ -188,7 +147,6 @@ public:
 
 	void TeleopPeriodic() override {
 		// Use the joystick X axis for lateral movement, Y axis for forward movement, and Z axis for rotation.
-		//m_robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
 		m_robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
 
 		if(leftJoystick.GetRawButton(9)) { // open cube grabber
