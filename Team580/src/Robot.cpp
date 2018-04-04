@@ -5,7 +5,7 @@
 #include <IterativeRobot.h>
 #include <Joystick.h>
 #include <Spark.h>
-//#include <ADXRS450_Gyro.h>
+#include <ADXRS450_Gyro.h>
 
 class Robot : public frc::IterativeRobot {
 public:
@@ -211,6 +211,6 @@ private:
 	frc::Timer timer;
 	int station;
 	std::string gameData;
-	//ADXRS450_Gyro gyro;
+	ADXRS450_Gyro gyro;
 };
 START_ROBOT_CLASS(Robot)
