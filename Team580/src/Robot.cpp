@@ -19,6 +19,7 @@ public:
 		winch(9)
 {
 }
+
 	void moveForward(double speed) {
 		m_robotDrive.DriveCartesian((0.0),(speed),(0.0));
 	}
@@ -37,11 +38,6 @@ public:
 		fluxCapacitor.Set(0.5);
 	}
 
-	void stopShooter() {
-		leftGrabber.Set(0);
-		rightGrabber.Set(0);
-	}
-
 	void motionless() {
 		m_robotDrive.DriveCartesian((0.0),(0.0),(0.0));
 	}
@@ -54,84 +50,92 @@ public:
 		timer.Reset();
 		timer.Start();
 		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // left or right switch?
+
+		if(gameData[0] == 'L') {
+			leftSwitch = true;
+		} else { // 'R'
+			rightSwitch = true;
+		}
+
+		if(input1) { // 100
+			leftPos = true;
+		} else if(input2) { // 010
+			middlePos = true;
+		} else if(input3) { // 001
+			rightPos = true;
+		}
 	}
 
 	void AutonomousPeriodic() override {
-		station = 1; // test purposes
 		if(gameData.length() > 0) {
-			if(gameData[0] == 'L') { // left scale
-				if(station == 1) { // left station
+			if(leftSwitch) {
+				if(leftPos) {
 					if(timer.Get() < 3.0) {
 						moveForward(-0.5);
-						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
-					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+					} else if(timer.Get() > 4 && timer.Get() < 4.75) {
 						rotateRight();
 					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
 						moveForward(-0.4);
-					} else if(timer.Get() > 7.0 && timer.Get() < 9.0) {
+					} else if(timer.Get() > 7 && timer.Get() < 9) {
 						shootCube();
 					} else {
 						motionless();
 					}
-				} else if(station == 2) { // middle station
+				} else if(middlePos) {
 					if(timer.Get() < 1.0) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 1.25 && timer.Get() < 2.0) {
+					} else if(timer.Get() > 1.25 && timer.Get() < 2) {
 						rotateLeft();
 					} else if(timer.Get() > 2.5 && timer.Get() < 3.5) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+					} else if(timer.Get() > 4 && timer.Get() < 4.75) {
 						rotateRight();
-					} else if(timer.Get() > 5.0 && timer.Get() < 6.0) {
+					} else if(timer.Get() > 5 && timer.Get() < 6) {
 						moveForward(-0.4);
-					} else if(timer.Get() > 6.0 && timer.Get() < 8.0) {
+					} else if(timer.Get() > 6 && timer.Get() < 8) {
 						shootCube();
 					} else {
 						motionless();
 					}
-
-				} else if(station == 3) { // right station
-					if(timer.Get() < 3.0) {
+				} else if(rightPos) {
+					if(timer.Get() < 3) {
 						moveForward(-0.5);
 					} else {
 						motionless();
 					}
 				}
 
-			} else if(gameData[0] == 'R') { // right scale
-				if(station == 1) { // left switch
-					if(timer.Get() < 3.0) {
+			} else if(rightSwitch) {
+				if(leftPos) {
+					if(timer.Get() < 3) {
 						moveForward(-0.5);
 					} else {
 						motionless();
 					}
-
-				} else if(station == 2) { // middle station
-					if(timer.Get() < 1.0) {
+				} else if(middlePos) {
+					if(timer.Get() < 1) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 1.25 && timer.Get() < 2.0) {
+					} else if(timer.Get() > 1.25 && timer.Get() < 2) {
 						rotateRight();
 					} else if(timer.Get() > 2.5 && timer.Get() < 3.5) {
 						moveForward(-0.5);
-					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+					} else if(timer.Get() > 4 && timer.Get() < 4.75) {
 						rotateLeft();
-					} else if(timer.Get() > 5.0 && timer.Get() < 6.0) {
+					} else if(timer.Get() > 5 && timer.Get() < 6) {
 						moveForward(-0.4);
-					} else if(timer.Get() > 6.0 && timer.Get() < 8.0) {
+					} else if(timer.Get() > 6 && timer.Get() < 8) {
 						shootCube();
 					} else {
 						motionless();
 					}
-
-				} else if(station == 3) { // right station
-					if(timer.Get() < 3.0) {
+				} else if(rightPos) { // right station
+					if(timer.Get() < 3) {
 						moveForward(-0.5);
-						//winch.Set(0.35f); //4" @ .75 per second, 5.5" @ 1.0 per second
-					} else if(timer.Get() > 4.0 && timer.Get() < 4.75) {
+					} else if(timer.Get() > 4 && timer.Get() < 4.75) {
 						rotateLeft();
 					} else if(timer.Get() > 5.5 && timer.Get() < 6.5) {
 						moveForward(-0.4);
-					} else if(timer.Get() > 7.0 && timer.Get() < 9.0) {
+					} else if(timer.Get() > 7 && timer.Get() < 9) {
 						shootCube();
 					} else {
 						motionless();
@@ -184,7 +188,7 @@ public:
 		} else if(leftJoystick.GetRawButton(4)) { // winch climb down
 			winch.Set(-1);
 		} else { // winch motor off
-			winch.Set(0.0f);
+			winch.Set(0);
 		}
 	}
 
@@ -209,8 +213,15 @@ private:
 	frc::Talon fluxCapacitor;
 	frc::Talon winch;
 	frc::Timer timer;
-	int station;
 	std::string gameData;
 	ADXRS450_Gyro gyro;
+	DigitalInput input1;
+	DigitalInput input2;
+	DigitalInput input3;
+	bool leftSwitch = false;
+	bool rightSwitch = false;
+	bool leftPos = false;
+	bool middlePos = false;
+	bool rightPos = false;
 };
 START_ROBOT_CLASS(Robot)
