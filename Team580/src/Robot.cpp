@@ -5,8 +5,7 @@
 #include <IterativeRobot.h>
 #include <Joystick.h>
 #include <Spark.h>
-#include <ADXRS450_Gyro.h>
-
+#include <DigitalInput.h>
 class Robot : public frc::IterativeRobot {
 public:
 	Robot():
@@ -16,34 +15,49 @@ public:
 		leftClimber(6),
 		rightClimber(7),
 		fluxCapacitor(8),
-		winch(9)
+		winch(9),
+		// DIO ports
+		input1(0),
+		input2(1),
+		input3(2)
 {
 }
+	void RobotInit() {
+		robotDrive.SetSafetyEnabled(false);
+	}
 
+	// Robot moves forward at a rate of power that is passed in
 	void moveForward(double speed) {
-		m_robotDrive.DriveCartesian((0.0),(speed),(0.0));
+		robotDrive.DriveCartesian((0.0),(speed),(0.0));
 	}
 
+	// Rotates right at 50% power
 	void rotateRight() {
-		m_robotDrive.DriveCartesian((0.0),(0.0),(-0.5));
+		robotDrive.DriveCartesian((0.0),(0.0),(-0.5));
 	}
 
+	// Rotates left at 50% power
 	void rotateLeft() {
-		m_robotDrive.DriveCartesian((0.0),(0.0),(0.5));
+		robotDrive.DriveCartesian((0.0),(0.0),(0.5));
 	}
 
+	// Intake grabbers spin at 100% power and flux opens at 50% power
 	void shootCube() {
 		leftGrabber.Set(-1);
 		rightGrabber.Set(1);
 		fluxCapacitor.Set(0.5);
 	}
 
-	void motionless() {
-		m_robotDrive.DriveCartesian((0.0),(0.0),(0.0));
+	// Grabber motors and flux turn off
+	void stopShooter() {
+		leftGrabber.Set(0);
+		rightGrabber.Set(0);
+		fluxCapacitor.Set(0);
 	}
 
-	void RobotInit() {
-		m_robotDrive.SetSafetyEnabled(false);
+	// All wheel motors turn off
+	void motionless() {
+		robotDrive.DriveCartesian((0.0),(0.0),(0.0));
 	}
 
 	void AutonomousInit() override {
@@ -51,24 +65,22 @@ public:
 		timer.Start();
 		gameData = frc::DriverStation::GetInstance().GetGameSpecificMessage(); // left or right switch?
 
-		if(gameData[0] == 'L') {
+		if(gameData[0] == 'L') { // checks if switch is left
 			leftSwitch = true;
-		} else { // 'R'
-			rightSwitch = true;
 		}
 
-		if(input1) { // 100
+		if(input1.Get()) { // 100
 			leftPos = true;
-		} else if(input2) { // 010
+		} else if(input2.Get()) { // 010
 			middlePos = true;
-		} else if(input3) { // 001
+		} else if(input3.Get()) { // 001
 			rightPos = true;
 		}
 	}
 
 	void AutonomousPeriodic() override {
 		if(gameData.length() > 0) {
-			if(leftSwitch) {
+			if(leftSwitch) {	// Left switch logic
 				if(leftPos) {
 					if(timer.Get() < 3.0) {
 						moveForward(-0.5);
@@ -80,6 +92,7 @@ public:
 						shootCube();
 					} else {
 						motionless();
+						stopShooter();
 					}
 				} else if(middlePos) {
 					if(timer.Get() < 1.0) {
@@ -96,6 +109,7 @@ public:
 						shootCube();
 					} else {
 						motionless();
+						stopShooter();
 					}
 				} else if(rightPos) {
 					if(timer.Get() < 3) {
@@ -104,8 +118,7 @@ public:
 						motionless();
 					}
 				}
-
-			} else if(rightSwitch) {
+			} else { // leftSwitch = false
 				if(leftPos) {
 					if(timer.Get() < 3) {
 						moveForward(-0.5);
@@ -127,8 +140,9 @@ public:
 						shootCube();
 					} else {
 						motionless();
+						stopShooter();
 					}
-				} else if(rightPos) { // right station
+				} else if(rightPos) {
 					if(timer.Get() < 3) {
 						moveForward(-0.5);
 					} else if(timer.Get() > 4 && timer.Get() < 4.75) {
@@ -139,6 +153,7 @@ public:
 						shootCube();
 					} else {
 						motionless();
+						stopShooter();
 					}
 				}
 			}
@@ -150,24 +165,23 @@ public:
 	}
 
 	void TeleopPeriodic() override {
-		// Use the joystick X axis for lateral movement, Y axis for forward movement, and Z axis for rotation.
-		m_robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
+		robotDrive.DriveCartesian(rightJoystick.GetX(), rightJoystick.GetY(), -(rightJoystick.GetZ()));
 
 		if(leftJoystick.GetRawButton(9)) { // open cube grabber
 			fluxCapacitor.Set(0.5);
 		} else if(leftJoystick.GetRawButton(10)) { // close cube grabber
 			fluxCapacitor.Set(-0.5);
-		} else {
+		} else { // flux motor off
 			fluxCapacitor.Set(0);
 		}
 
-		if(leftJoystick.GetRawButton(2)) { // "suck in" cube
-			leftGrabber.Set(1);
-			rightGrabber.Set(-1);
+		if(leftJoystick.GetRawButton(2)) { // suck in cube
+			leftGrabber.Set(0.5);
+			rightGrabber.Set(-0.5);
 		} else if(leftJoystick.GetRawButton(1)) { // shoot out cube
 			leftGrabber.Set(-1);
 			rightGrabber.Set(1);
-		} else { // turn off motors
+		} else { // grabber motors off
 			leftGrabber.Set(0);
 			rightGrabber.Set(0);
 		}
@@ -193,33 +207,31 @@ public:
 	}
 
 private:
-	static constexpr int kFrontLeftChannel = 0;
-	static constexpr int kRearLeftChannel = 1;
-	static constexpr int kFrontRightChannel = 2;
-	static constexpr int kRearRightChannel = 3;
+	static constexpr int frontLeftChannel = 0;
+	static constexpr int rearLeftChannel = 1;
+	static constexpr int frontRightChannel = 2;
+	static constexpr int rearRightChannel = 3;
 	static constexpr int joyChannel = 0;
 	static constexpr int joyChannel2 = 1;
-	frc::Spark m_frontLeft{kFrontLeftChannel};
-	frc::Spark m_rearLeft{kRearLeftChannel};
-	frc::Spark m_frontRight{kFrontRightChannel};
-	frc::Spark m_rearRight{kRearRightChannel};
-	frc::MecanumDrive m_robotDrive{m_frontLeft, m_rearLeft, m_frontRight, m_rearRight};
+	frc::Spark frontLeft{frontLeftChannel};
+	frc::Spark rearLeft{rearLeftChannel};
+	frc::Spark frontRight{frontRightChannel};
+	frc::Spark rearRight{rearRightChannel};
+	frc::MecanumDrive robotDrive{frontLeft, rearLeft, frontRight, rearRight};
 	frc::Joystick leftJoystick{joyChannel};
 	frc::Joystick rightJoystick{joyChannel2};
 	frc::Talon leftClimber;
 	frc::Talon rightClimber;
 	frc::Talon leftGrabber;
 	frc::Talon rightGrabber;
-	frc::Talon fluxCapacitor;
+	frc::Talon fluxCapacitor; // Back to the Future easter egg - controls the grabber's width
 	frc::Talon winch;
 	frc::Timer timer;
 	std::string gameData;
-	ADXRS450_Gyro gyro;
 	DigitalInput input1;
 	DigitalInput input2;
 	DigitalInput input3;
 	bool leftSwitch = false;
-	bool rightSwitch = false;
 	bool leftPos = false;
 	bool middlePos = false;
 	bool rightPos = false;
